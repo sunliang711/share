@@ -10,9 +10,14 @@ import (
 	"github.com/spf13/viper"
 )
 
+var (
+	buildstamp string
+	githash    string
+)
+
 func main() {
 	logrus.Infof("main()")
-	defer func(){
+	defer func() {
 		database.Release()
 	}()
 

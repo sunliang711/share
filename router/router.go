@@ -32,12 +32,14 @@ func StartServer(addr string, tls bool, certFile string, keyFile string) {
 
 	// Put normal handlers below
 	router.GET("/api/v1/health", handlers.Health)
+	router.POST("/api/v1/push_text", handlers.PushText)
+	router.POST("/api/v1/push_file", handlers.PushFile)
+	router.GET("/api/v1/pull/:key", handlers.Pull)
 	// router.GET("/api/v1/PATH", handlers.XXX)
 
 	// Put need-auth handlers below
 	// router.GET("/api/v1/PATH", middleware.Auth)
 	// router.POST("/api/v1/PATH", middleware.Auth)
-
 
 	logrus.Infof("Start server on %v, tls enabled: %v", addr, tls)
 	if tls {

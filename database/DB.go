@@ -95,7 +95,8 @@ func closeMongo() {
 	}
 }
 
-func Release(){
+func Release() {
 	closeMongo()
 	closeMysql()
+	closeRedis()
 }

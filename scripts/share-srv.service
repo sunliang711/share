@@ -1,0 +1,29 @@
+[Unit]
+Description=share service
+#After=network.target
+
+[Service]
+#Type=forking
+#PIDFile=
+#ExecStart=
+#ExecStop=
+
+#Type=oneshot
+#RemainAfterExit=yes
+#ExecStart=
+#ExecStop=
+
+Type=simple
+# ExecStartPre=
+ExecStart=DEST/EXE
+# ExecStartPost=
+
+#ExecStop=
+#ExecStopPost=
+
+#User=USER
+WorkingDirectory=DEST
+Restart=always
+#Environment=
+[Install]
+WantedBy=multi-user.target

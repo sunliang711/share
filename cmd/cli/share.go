@@ -37,6 +37,7 @@ Usage: %v CMD
 CMD:
 	push [-f filename]
 	pull <key> [-o output]
+	version|--v|--version
 `
 		fmt.Fprintf(os.Stderr, usage, os.Args[0])
 		os.Exit(1)
@@ -47,6 +48,8 @@ CMD:
 		push()
 	case "pull":
 		pull()
+	case "version", "--version", "-V":
+		version()
 	default:
 	}
 
@@ -133,4 +136,9 @@ func pull() {
 		utils.QuitMsg("Invalid type\n")
 	}
 
+}
+
+func version() {
+	fmt.Fprintf(os.Stderr, "Build time: %s\ngit rev: %s\n", buildstamp, githash)
+	os.Exit(0)
 }

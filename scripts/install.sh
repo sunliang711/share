@@ -114,7 +114,7 @@ installServer(){
 }
 
 build(){
-    flags="-X main.buildstamp=`date -u '+%Y-%m-%d_%I:%M:%S%p'` -X main.githash=`git rev-parse HEAD`"
+    flags="-X main.buildstamp=`date +%FT%T` -X main.githash=`git rev-parse HEAD`"
     echo "build ${serviceName}..."
     cd "${this}"
     go build -ldflags "$flags" -o ${serviceName} "${this}/../cmd/share"

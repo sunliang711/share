@@ -101,6 +101,8 @@ installServer(){
         mkdir -p "${dest}" || { echo "failed!"; exit 1; }
     fi
 
+    mkdir -p "share-server" || { echo "Create share-server failed!"; exit 1; }
+
     cp config.toml "${dest}"
     cp ${serviceName} "${dest}"
 

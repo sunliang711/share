@@ -83,7 +83,7 @@ fi
 # TODO
 
 serviceName="share-srv"
-cliName="share"
+cliName="share-cli"
 installServer(){
     cd "${this}"
     local dest="${1:?'missing install location'}"
@@ -126,7 +126,8 @@ build(){
 installClient(){
     local dest="${1:-/usr/local/bin}"
     cd "${this}"
-    mv ${cliName} "${dest}"
+    cp ${cliName} "${dest}"
+    cp .share.toml $home
 }
 
 em(){

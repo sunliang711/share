@@ -52,6 +52,7 @@ func PushText(c *gin.Context) {
 }
 
 func Pull(c *gin.Context) {
+	logrus.Infof("Content type: %v\n", c.ContentType())
 	key := c.Param("key")
 	keys := []string{"type", "name", "content"}
 	fields, err := database.Rdb.HMGet(database.Ctx, key, keys...).Result()

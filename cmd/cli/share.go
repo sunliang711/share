@@ -1,24 +1,30 @@
 package main
 
 import (
-	"bufio"
 	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
+	"os/user"
 	"share/types"
 	"share/utils"
-	"strings"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/pflag"
+	"github.com/spf13/viper"
 )
 
 var (
 	buildstamp string
 	githash    string
+)
+
+var (
+	RemoteURL = "http://localhost:8081"
+	PUSH_TEXT = "/api/v1/push_text"
+	PULL      = "/api/v1/pull"
 )
 
 // 两个功能模块
@@ -31,18 +37,43 @@ var (
 // url
 func main() {
 	if len(os.Args) < 2 {
-		usage := `
-Usage: %v CMD
+		usage := `Usage: %v CMD
 
 CMD:
-	push [-f filename]
-	pull <key> [-o output]
-	version|--v|--version
+	push 		[-f filename] [-v|--verbose]
+	pull 		<key> [-o output] [-v|--verbose]
+
+	version|-V|--version
 `
 		fmt.Fprintf(os.Stderr, usage, os.Args[0])
 		os.Exit(1)
 	}
+	// logrus.SetLevel(logrus.DebugLevel)
 
+	var configFile string
+	usr, err := user.Current()
+	if err == nil {
+		configFile = usr.HomeDir + "/.share.toml"
+		logrus.Debugf("config file: %v", configFile)
+	}
+
+	if _, err := os.Stat(configFile); os.IsNotExist(err) {
+
+	} else {
+		logrus.Debugf("read config file: %v", configFile)
+		// read config file
+		viper.SetConfigFile(configFile)
+		err = viper.ReadInConfig()
+		if err != nil {
+			utils.QuitMsg(fmt.Sprintf("Read config file error: %v", err))
+		}
+	}
+
+	if viper.GetString("remote_url") != "" {
+		RemoteURL = viper.GetString("remote_url")
+	}
+
+	logrus.Debugf("remote url: %v", RemoteURL)
 	switch os.Args[1] {
 	case "push":
 		push()
@@ -55,48 +86,58 @@ CMD:
 
 }
 
-var (
-	remoteURL = "http://localhost:8081"
-	PUSH_TEXT = "/api/v1/push_text"
-	PULL      = "/api/v1/pull"
-)
-
 func push() {
 	inputFile := pflag.StringP("file", "f", "", "input file")
+	verbose := pflag.BoolP("verbose", "v", false, "verbose")
 	pflag.Parse()
 	if len(*inputFile) > 0 {
 
 	} else {
 		// read stdin
-		var lines []string
-		scanner := bufio.NewScanner(os.Stdin)
-		for scanner.Scan() {
-			line := scanner.Text()
-			logrus.Infof("line: %v", line)
-			lines = append(lines, line)
+		var result []byte
+		buf := make([]byte, 1024)
+		if *verbose {
+			logrus.Infof("Read from stdin...\n")
 		}
-		oneLine := strings.Join(lines, "")
-		data := types.Share{Content: oneLine}
-		bs, err := json.Marshal(&data)
-		if err != nil {
-			panic(err)
+		for {
+			n, err := os.Stdin.Read(buf)
+			if n > 0 {
+				result = append(result, buf[:n]...)
+			}
+			if err == io.EOF {
+				if *verbose {
+					logrus.Infof("End\n")
+				}
+				break
+			} else if err != nil {
+				utils.QuitMsg(fmt.Sprintf("read stdin error: %v", err))
+			}
 		}
 
-		req, err := http.NewRequest("POST", remoteURL+PUSH_TEXT, bytes.NewBuffer(bs))
+		data := types.Share{Content: string(result)}
+		bs, err := json.Marshal(&data)
+		if err != nil {
+			utils.QuitMsg(fmt.Sprintf("Encode request body error: %v", err))
+		}
+
+		if *verbose {
+			logrus.Infof("remote url: %v", RemoteURL)
+		}
+		req, err := http.NewRequest("POST", RemoteURL+PUSH_TEXT, bytes.NewBuffer(bs))
 		req.Header.Set("Content-Type", "application/json")
 		client := &http.Client{}
 		resp, err := client.Do(req)
 		if err != nil {
-			panic(err)
+			utils.QuitMsg(fmt.Sprintf("POST error: %v", err))
 		}
 		defer resp.Body.Close()
 		io.Copy(os.Stdout, resp.Body)
-
 	}
 }
 
 func pull() {
 	outputFile := pflag.StringP("output", "o", "", "output file")
+	verbose := pflag.BoolP("verbose", "v", false, "verbose")
 	pflag.Parse()
 
 	if pflag.NArg() < 2 {
@@ -104,7 +145,11 @@ func pull() {
 		os.Exit(1)
 	}
 	key := pflag.Arg(1)
-	resp, err := http.Get(fmt.Sprintf("%s%s/%s", remoteURL, PULL, key))
+	if *verbose {
+		logrus.Infof("key: %v", key)
+		logrus.Infof("remote url: %v", RemoteURL)
+	}
+	resp, err := http.Get(fmt.Sprintf("%s%s/%s", RemoteURL, PULL, key))
 	if err != nil {
 		panic(err)
 	}

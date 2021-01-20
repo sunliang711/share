@@ -2,3 +2,5 @@
 *.swp
 .idea/
 share.log
+share-srv
+share-cli

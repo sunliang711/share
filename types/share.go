@@ -13,6 +13,13 @@ const (
 	OK = 0
 )
 
+type PushResp struct {
+	Code int    `json:"code"`
+	Msg  string `json:"msg"`
+	Key  string `json:"key"`
+	TTL  int64  `json:"ttl"`
+}
+
 type Share struct {
 	// for response
 	Code int

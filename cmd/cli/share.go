@@ -91,7 +91,8 @@ func push() {
 	verbose := pflag.BoolP("verbose", "v", false, "verbose")
 	pflag.Parse()
 	if len(*inputFile) > 0 {
-
+		fmt.Fprintf(os.Stderr, "%s", "TODO")
+		os.Exit(1)
 	} else {
 		// read stdin
 		var result []byte

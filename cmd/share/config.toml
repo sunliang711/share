@@ -23,7 +23,8 @@ poolSize = 5
 
 [business]
 ttl = 1200
-md5PreLen = 4
+hash_min_len = 4
+push_limit = 30
 
 [jwt]
 headerName = "token"

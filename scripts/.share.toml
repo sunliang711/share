@@ -1,1 +1,2 @@
-remote_url="http://localhost:8080"
+# remote_url="http://localhost:8080"
+remote_url="http://aliyun.eagle.win:9010"

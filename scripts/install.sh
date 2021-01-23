@@ -132,6 +132,7 @@ installClient(){
     cd "${this}"
     cp ${cliName} "${dest}"
     cp .share.toml $home
+    ${ed} $home/.share.toml
 }
 
 em(){

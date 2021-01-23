@@ -86,6 +86,8 @@ serviceName="share-srv"
 cliName="share-cli"
 installServer(){
     cd "${this}"
+    _runAsRoot "systemctl stop ${serviceName}.service"
+    build
     local dest="${1:?'missing install location'}"
     if [ ! -e config.toml ];then
         echo "Not found config.toml" >&2
